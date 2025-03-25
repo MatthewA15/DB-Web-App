@@ -1,3 +1,4 @@
+import os
 import bcrypt
 import jwt
 import datetime
@@ -12,6 +13,7 @@ token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE3NDIzNT
 
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 # MySQL Database Connection
 db = mysql.connector.connect(
