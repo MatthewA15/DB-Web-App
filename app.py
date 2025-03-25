@@ -15,10 +15,11 @@ app = Flask(__name__)
 
 # MySQL Database Connection
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",  
-    password="Alexander9!", 
-    database="restaurant_db"
+    host="restaurant-db.c1iyaow6qu35.ca-central-1.rds.amazonaws.com",
+    user="admin",              
+    password="Ontariotechu",
+    database="restaurant_db",  
+    port=3306                  
 )
 
 cursor = db.cursor()
