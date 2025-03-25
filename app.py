@@ -6,22 +6,23 @@ import secrets
 from flask import Flask, request, jsonify
 import mysql.connector
 from functools import wraps
+from dotenv import load_dotenv 
 
-SECRET_KEY = "a3f2b4c59d6e82d34f1b8a7e60f8a2c1e9d4c7f5a3b2c6d8e0f1a4b9c3e7d6f5"
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE3NDIzNTI5NDV9.XVldUXyoNWVABml9tUkq8vgVb15g0hZUgyPRPjhSuZo"
 
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+load_dotenv()  # If you're using a .env file
 
-# MySQL Database Connection
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "a3f2b4c59d6e82d34f1b8a7e60f8a2c1e9d4c7f5a3b2c6d8e0f1a4b9c3e7d6f5")
+
 db = mysql.connector.connect(
-    host="restaurant-db.c1iyaow6qu35.ca-central-1.rds.amazonaws.com",
-    user="admin",              
-    password="Ontariotechu",
-    database="restaurant_db",  
-    port=3306                  
+    host=os.getenv("DB_HOST", "abhinavsiva.mysql.pythonanywhere-services.com"),
+    port=os.getenv("DB_PORT", 3306),
+    user=os.getenv("DB_USER", "abhinavsiva"),
+    password=os.getenv("DB_PASSWORD", "YourMySQLPassword"),
+    database=os.getenv("DB_NAME", "abhinavsiva$restaurant_db")
 )
 
 cursor = db.cursor()
