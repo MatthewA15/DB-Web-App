@@ -21,7 +21,7 @@ db = mysql.connector.connect(
     host=os.getenv("DB_HOST", "abhinavsiva.mysql.pythonanywhere-services.com"),
     port=os.getenv("DB_PORT", 3306),
     user=os.getenv("DB_USER", "abhinavsiva"),
-    password=os.getenv("DB_PASSWORD", "YourMySQLPassword"),
+    password=os.getenv("DB_PASSWORD", ""),
     database=os.getenv("DB_NAME", "abhinavsiva$restaurant_db")
 )
 
