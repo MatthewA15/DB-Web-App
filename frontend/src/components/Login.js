@@ -12,16 +12,25 @@ const Login = () => {
       localStorage.setItem('token', res.data.token);
       alert('Login successful');
     } catch (err) {
-      alert('Login failed');
+      alert('Login failed: ' + err.response?.data?.error || 'Unknown error');
     }
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit">Login</button>
-    </form>
+    <div className="card mx-auto p-4" style={{ maxWidth: '400px' }}>
+      <h3 className="mb-3 text-center">Login</h3>
+      <form onSubmit={handleLogin}>
+        <div className="mb-3">
+          <label>Email</label>
+          <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label>Password</label>
+          <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <button className="btn btn-primary w-100" type="submit">Login</button>
+      </form>
+    </div>
   );
 };
 
