@@ -117,7 +117,7 @@ def get_customers():
     return jsonify(customer_list), 200
 
 # Get order by ID (protected)
-@app.route("/api/orders", methods=["GET"])
+@app.route("/api/orders/<int:id>", methods=["GET"])
 @token_required
 def get_order(id):
     cursor.execute("SELECT * FROM orders WHERE OrderID = %s", (id,))
