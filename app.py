@@ -26,7 +26,7 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-@app.route("/")
+@app.route("/api")
 def home():
     return jsonify({"message": "Restaurant Order Management API is running"}), 200
 
@@ -62,7 +62,7 @@ def token_required(f):
     return decorated
 
 # Create new customer
-@app.route("/customers", methods=["POST"])
+@app.route("/api/customers", methods=["POST"])
 def add_customer():
     data = request.json
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -73,7 +73,7 @@ def add_customer():
     return jsonify({"message": "Customer added successfully!"}), 201
 
 # Login route
-@app.route("/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def login():
     data = request.json
     email = data["email"]
@@ -102,7 +102,7 @@ def login():
     return jsonify({"token": token}), 200
 
 # Get all customers
-@app.route("/customers", methods=["GET"])
+@app.route("/api/customers", methods=["GET"])
 @token_required
 def get_customers():
     cursor.execute("SELECT * FROM Customers")
@@ -119,7 +119,7 @@ def get_customers():
     return jsonify(customer_list), 200
 
 # Get order by ID
-@app.route("/orders/<int:id>", methods=["GET"])
+@app.route("/api/orders/<int:id>", methods=["GET"])
 @token_required
 def get_order(id):
     cursor.execute("SELECT * FROM Orders WHERE OrderID = %s", (id,))
