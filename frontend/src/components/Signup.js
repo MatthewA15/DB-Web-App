@@ -13,7 +13,7 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:5000/customers', user);
+      await axios.post('https://abhinavsiva.pythonanywhere.com/api/customers', user);
       alert('Signup successful!');
     } catch (err) {
       const message = err.response?.data?.error || 'Signup failed.';
