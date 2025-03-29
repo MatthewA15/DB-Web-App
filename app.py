@@ -119,7 +119,7 @@ def get_customers():
 # Get order by ID (protected)
 @app.route("/api/orders", methods=["GET"])
 @token_required
-def get_order(id):
+def get_order():
     cursor.execute("SELECT * FROM orders WHERE OrderID = %s", (id,))
     order = cursor.fetchone()
     if not order:
