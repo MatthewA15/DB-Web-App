@@ -65,7 +65,7 @@ def token_required(f):
 def add_customer():
     data = request.json
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    query = "INSERT INTO Customers (Name, Email, Phone, Address, Password) VALUES (%s, %s, %s, %s, %s)"
+    query = "INSERT INTO customers (Name, Email, Phone, Address, Password) VALUES (%s, %s, %s, %s, %s)"
     values = (data["name"], data["email"], data["phone"], data["address"], hashed_password)
     cursor.execute(query, values)
     db.commit()
