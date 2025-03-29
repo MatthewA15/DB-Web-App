@@ -62,7 +62,7 @@ def token_required(f):
     return decorated
 
 # Create new customer
-@app.route("/api/customers", methods=["POST"])
+@app.route("/customers", methods=["POST"])
 def add_customer():
     data = request.json
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -73,7 +73,7 @@ def add_customer():
     return jsonify({"message": "Customer added successfully!"}), 201
 
 # Login route
-@app.route("/api/login", methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     data = request.json
     email = data["email"]
