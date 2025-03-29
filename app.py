@@ -78,7 +78,7 @@ def login():
     email = data["email"]
     password = data["password"]
 
-    cursor.execute("SELECT CustomerID, Password FROM Customers WHERE Email = %s", (email,))
+    cursor.execute("SELECT CustomerID, Password FROM customers WHERE Email = %s", (email,))
     user = cursor.fetchone()
 
     if not user:
