@@ -14,7 +14,7 @@ const Orders = () => {
       }
 
       try {
-        const res = await axios.get('https://abhinavsiva.pythonanywhere.com/api/orders', {
+        const res = await axios.get('https://abhinavsiva.pythonanywhere.com/api/orders/${orderId}', {
           headers: {
             Authorization: `Bearer ${token}`
           }
