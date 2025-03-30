@@ -120,7 +120,7 @@ def get_customers():
 @app.route("/api/orders", methods=["GET"])
 @token_required
 def get_order():
-    cursor.execute("SELECT * FROM orders WHERE OrderID = %s", (id,))
+    cursor.execute("SELECT * FROM orders")
     order = cursor.fetchone()
     if not order:
         return jsonify({"error": "Order not found"}), 404
@@ -134,3 +134,4 @@ def get_order():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
