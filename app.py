@@ -119,30 +119,18 @@ def get_customers():
 # Get order by ID (protected)
 @app.route("/api/orders", methods=["GET"])
 @token_required
-def get_orders():
-    try:
-        cursor.execute("SELECT * FROM orders")
-        rows = cursor.fetchall()
-        
-        if not rows:
-            return jsonify([]), 200
-        
-        orders = []
-        for row in rows:
-            orders.append({
-                "OrderID": row[0],
-                "CustomerID": row[1],
-                "OrderDate": row[2].isoformat() if row[2] else None,
-                "Status": row[3],
-                "TotalAmount": float(row[4])
-            })
-        
-        return jsonify(orders), 200
-
-    except Exception as e:
-        print("Error fetching orders:", e)
-        return jsonify({"error": "An error occurred while fetching orders."}), 500
-
+def get_order():
+    cursor.execute("SELECT * FROM orders")
+    order = cursor.fetchone()
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+    return jsonify({
+        "OrderID": order[0],
+        "CustomerID": order[1],
+        "OrderDate": order[2],
+        "Status": order[3],
+        "TotalAmount": float(order[4])
+    }), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
