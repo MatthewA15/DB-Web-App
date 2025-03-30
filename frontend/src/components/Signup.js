@@ -16,10 +16,15 @@ const Signup = () => {
       await axios.post('https://abhinavsiva.pythonanywhere.com/api/customers', user);
       alert('Signup successful!');
     } catch (err) {
-      const message = err.response?.data?.error || 'Signup failed.';
-      alert(message);
+      if (err.response?.status === 409) {
+        alert('Email already registered. Please use a different email.');
+      } else {
+        const message = err.response?.data?.error || 'Signup failed.';
+        alert(message);
+      }
     }
   };
+  
 
   return (
     <div className="card mx-auto p-4" style={{ maxWidth: '500px' }}>

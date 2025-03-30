@@ -68,6 +68,11 @@ def token_required(f):
 @app.route("/api/customers", methods=["POST"])
 def add_customer():
     data = request.json
+    # Check if the email already exists
+    cursor.execute("SELECT * FROM customers WHERE Email = %s", (data["email"],))
+    existing_user = cursor.fetchone()
+    if existing_user:
+        return jsonify({"error": "Email already registered."}), 409
     hashed_password = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     query = "INSERT INTO customers (Name, Email, Phone, Address, Password) VALUES (%s, %s, %s, %s, %s)"
     values = (data["name"], data["email"], data["phone"], data["address"], hashed_password)
@@ -124,22 +129,63 @@ def get_customers():
 @app.route("/api/orders", methods=["GET"])
 @token_required
 def get_orders():
-    cursor.execute("SELECT * FROM orders")
-    rows = cursor.fetchall()  
+    query = """
+    SELECT o.OrderID, o.CustomerID, c.Name AS CustomerName, o.OrderDate, o.Status, o.TotalAmount
+    FROM orders o
+    JOIN customers c ON o.CustomerID = c.CustomerID
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
 
     if not rows:
-        return jsonify([]), 200  
+        return jsonify([]), 200
+
     orders = []
     for row in rows:
         orders.append({
             "OrderID": row[0],
             "CustomerID": row[1],
-            "OrderDate": row[2].isoformat() if row[2] else None,  
-            "Status": row[3],
-            "TotalAmount": float(row[4])
+            "CustomerName": row[2],
+            "OrderDate": row[3].isoformat() if row[3] else None,
+            "Status": row[4],
+            "TotalAmount": float(row[5])
         })
-    
+
     return jsonify(orders), 200
+
+# Place new order (protected)
+@app.route("/api/orders", methods=["POST"])
+@token_required
+def create_order():
+    data = request.json
+    query = "INSERT INTO orders (CustomerID, OrderDate, Status, TotalAmount) VALUES (%s, %s, %s, %s)"
+    values = (
+        request.user_id,
+        datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        data.get("status", "Pending"),
+        data["total"]
+    )
+    cursor.execute(query, values)
+    db.commit()
+    return jsonify({"message": "Order created!"}), 201
+
+# Update order status 
+@app.route("/api/orders/<int:order_id>", methods=["PUT"])
+@token_required
+def update_order(order_id):
+    data = request.json
+    new_status = data.get("status")
+    cursor.execute("UPDATE orders SET Status = %s WHERE OrderID = %s", (new_status, order_id))
+    db.commit()
+    return jsonify({"message": "Order status updated!"}), 200
+
+# Delete order by ID
+@app.route("/api/orders/<int:order_id>", methods=["DELETE"])
+@token_required
+def delete_order(order_id):
+    cursor.execute("DELETE FROM orders WHERE OrderID = %s", (order_id,))
+    db.commit()
+    return jsonify({"message": "Order deleted!"}), 200
 
 
 if __name__ == "__main__":

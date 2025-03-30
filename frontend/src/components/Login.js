@@ -12,7 +12,9 @@ const Login = () => {
       localStorage.setItem('token', res.data.token);
       alert('Login successful');
     } catch (err) {
-      alert('Login failed: ' + err.response?.data?.error || 'Unknown error');
+      const errorMessage = err.response?.data?.error || 'Unknown error';
+      alert('Login failed: ' + errorMessage);
+
     }
   };
 
