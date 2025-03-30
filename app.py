@@ -41,8 +41,7 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
-        auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
-        print("Received headers:", request.headers)
+        auth_header = request.headers.get("Authorization")
 
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
