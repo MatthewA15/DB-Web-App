@@ -187,6 +187,22 @@ def delete_order(order_id):
     db.commit()
     return jsonify({"message": "Order deleted!"}), 200
 
+#Menu order route
+@app.route("/api/menu", methods=["GET"])
+@token_required
+def get_menu():
+    cursor.execute("SELECT * FROM menu_items")
+    items = cursor.fetchall()
+    menu = []
+    for item in items:
+        menu.append({
+            "ItemID": item[0],
+            "Name": item[1],
+            "Description": item[2],
+            "Price": float(item[3])
+        })
+    return jsonify(menu), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
