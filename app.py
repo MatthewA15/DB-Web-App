@@ -303,6 +303,26 @@ def submit_feedback():
 
     return jsonify({"message": "Feedback submitted successfully!"}), 201
 
+#
+@app.route("/api/payments", methods=["POST"])
+@token_required
+def submit_payment():
+    data = request.json
+    order_id = data.get("order_id")
+    amount = data.get("amount")
+    method = data.get("method")
+
+    if not order_id or not amount or not method:
+        return jsonify({"error": "Missing fields"}), 400
+
+    cursor.execute(
+        "INSERT INTO payments (OrderID, Amount, PaymentDate, PaymentMethod) VALUES (%s, %s, NOW(), %s)",
+        (order_id, amount, method)
+    )
+    db.commit()
+
+    return jsonify({"message": "✅ Payment recorded (mock)!"}), 201
+
 if __name__ == "__main__":
     app.run(debug=True)
 
