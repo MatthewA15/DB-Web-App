@@ -259,6 +259,30 @@ def get_menu():
         })
     return jsonify(menu), 200
 
+#Staff login route
+@app.route("/api/staff/login", methods=["POST"])
+def staff_login():
+    data = request.json
+    username = data["username"]
+    password = data["password"]
+
+    cursor.execute("SELECT StaffID, Password FROM staff WHERE Username = %s", (username,))
+    user = cursor.fetchone()
+
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    staff_id, hashed_pw = user
+    if not bcrypt.checkpw(password.encode('utf-8'), hashed_pw.encode('utf-8')):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    token = jwt.encode(
+        {"staff_id": staff_id, "role": "staff", "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)},
+        app.config["SECRET_KEY"],
+        algorithm="HS256"
+    )
+    return jsonify({"token": token}), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)

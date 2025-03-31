@@ -5,6 +5,7 @@ import Signup from './components/Signup';
 import Orders from './components/Orders';
 import Navbar from './components/Navbar';
 import Menu from './components./Menu';
+import StaffOrders from './components/StaffOrders';
 function App() {
   return (
     <Router>
@@ -15,6 +16,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/staff-orders" element={<StaffOrders />} />
         </Routes>
       </div>
     </Router>
