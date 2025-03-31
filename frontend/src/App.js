@@ -8,6 +8,8 @@ import Menu from './components./Menu';
 import StaffOrders from './components/StaffOrders';
 import Feedback from './components/Feedback';
 import Payment from './components/Payment';
+import About from './components/About';
+
 function App() {
   return (
     <Router>
@@ -21,6 +23,7 @@ function App() {
           <Route path="/staff-orders" element={<StaffOrders />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
     </Router>
