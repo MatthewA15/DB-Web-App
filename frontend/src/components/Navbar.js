@@ -75,6 +75,9 @@ const Navbar = () => {
                   Logout
                 </button>
               </li>
+              <li className="nav-item">
+                <a className="nav-link" href="/menu">Menu</a>
+              </li>
             </>
           )}
         </ul>

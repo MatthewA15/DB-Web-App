@@ -4,7 +4,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Orders from './components/Orders';
 import Navbar from './components/Navbar';
-
+import Menu from './components./Menu';
 function App() {
   return (
     <Router>
@@ -14,6 +14,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/menu" element={<Menu />} />
         </Routes>
       </div>
     </Router>

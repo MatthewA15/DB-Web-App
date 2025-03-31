@@ -158,7 +158,13 @@ def get_orders():
 @token_required
 def create_order():
     data = request.json
-    query = "INSERT INTO orders (CustomerID, OrderDate, Status, TotalAmount) VALUES (%s, %s, %s, %s)"
+    items = data.get("items", [])  # Expecting a list of items
+
+    # Insert order
+    query = """
+        INSERT INTO orders (CustomerID, OrderDate, Status, TotalAmount)
+        VALUES (%s, %s, %s, %s)
+    """
     values = (
         request.user_id,
         datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
@@ -167,7 +173,57 @@ def create_order():
     )
     cursor.execute(query, values)
     db.commit()
-    return jsonify({"message": "Order created!"}), 201
+
+    order_id = cursor.lastrowid  # Get the newly created order ID
+
+    # Insert each order item
+    for item in items:
+        item_name = item.get("ItemName")
+        quantity = item.get("Quantity")
+        price = item.get("Price")
+
+        if item_name and quantity and price:
+            cursor.execute(
+                """
+                INSERT INTO order_items (OrderID, ItemName, Quantity, Price)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (order_id, item_name, quantity, price)
+            )
+    db.commit()
+
+    return jsonify({"message": "Order with items created!"}), 201
+
+# Adds item to existing order
+@app.route("/api/orders/<int:order_id>/items", methods=["POST"])
+@token_required
+def add_order_item(order_id):
+    data = request.json
+    item_name = data.get("ItemName")
+    quantity = data.get("Quantity")
+    price = data.get("Price")
+
+    if not item_name or not quantity or not price:
+        return jsonify({"error": "Missing item name, quantity, or price"}), 400
+
+    query = """
+        INSERT INTO order_items (OrderID, ItemName, Quantity, Price)
+        VALUES (%s, %s, %s, %s)
+    """
+    values = (order_id, item_name, quantity, price)
+    cursor.execute(query, values)
+    db.commit()
+
+    return jsonify({"message": "Order item added!"}), 201
+
+#delete an item from the order
+@app.route("/api/orders/<int:order_id>/items/<int:item_id>", methods=["DELETE"])
+@token_required
+def delete_order_item(order_id, item_id):
+    cursor.execute("DELETE FROM order_items WHERE OrderID = %s AND OrderItemID = %s", (order_id, item_id))
+    db.commit()
+    return jsonify({"message": "Order item deleted!"}), 200
+
 
 # Update order status 
 @app.route("/api/orders/<int:order_id>", methods=["PUT"])

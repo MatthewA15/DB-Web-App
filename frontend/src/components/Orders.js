@@ -24,7 +24,7 @@ const Orders = () => {
       } catch (err) {
         console.error('Error fetching orders:', err);
         setError('Failed to fetch orders. Please log in again.');
-        localStorage.removeItem('token'); // Clear invalid token
+        localStorage.removeItem('token');
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
@@ -34,42 +34,60 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+  const handleAddOrder = async () => {
+    const total = prompt("Enter total amount:");
+    if (!total) return;
+
+    const itemName = prompt("Enter item name:");
+    const quantity = prompt("Enter quantity:");
+    const price = prompt("Enter item price:");
+
+    if (!itemName || !quantity || !price) {
+      alert("Missing item details.");
+      return;
+    }
+
+    const items = [
+      {
+        ItemName: itemName,
+        Quantity: parseInt(quantity),
+        Price: parseFloat(price)
+      }
+    ];
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post("https://abhinavsiva.pythonanywhere.com/api/orders", {
+        total,
+        status: "Pending",
+        items
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      alert("Order added!");
+      window.location.reload();
+    } catch (err) {
+      alert("Failed to add order.");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="container">
       <h2 className="mb-4">Order Management</h2>
-  
-      <button
-        className="btn btn-success mb-3"
-        onClick={async () => {
-          const total = prompt("Enter total amount:");
-          if (!total) return;
-          try {
-            const token = localStorage.getItem("token");
-            await axios.post("https://abhinavsiva.pythonanywhere.com/api/orders", {
-              total,
-              status: "Pending"
-            }, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
-            alert("Order added!");
-            window.location.reload(); // refresh orders
-          } catch (err) {
-            alert("Failed to add order.");
-            console.error(err);
-          }
-        }}
-      >
-        ➕ Add Order
+
+      <button className="btn btn-success mb-3" onClick={handleAddOrder}>
+        ➕ Add Order with Item
       </button>
-  
+
       {error && <div className="alert alert-danger">{error}</div>}
-  
+
       {orders.length === 0 && !error && (
         <p className="text-muted">No orders found.</p>
       )}
-  
+
       <ul className="list-group">
         {orders.map((order) => (
           <li className="list-group-item" key={order.OrderID}>
@@ -79,6 +97,7 @@ const Orders = () => {
             <p><strong>Status:</strong> {order.Status || 'N/A'}</p>
             <p><strong>Total Amount:</strong> ${order.TotalAmount ? order.TotalAmount.toFixed(2) : '0.00'}</p>
             <p><strong>Order Date:</strong> {order.OrderDate || 'N/A'}</p>
+
             <button
               className="btn btn-warning btn-sm me-2"
               onClick={async () => {
@@ -103,6 +122,7 @@ const Orders = () => {
             >
               ✏️ Update Status
             </button>
+
             <button
               className="btn btn-danger btn-sm"
               onClick={async () => {
@@ -128,7 +148,7 @@ const Orders = () => {
         ))}
       </ul>
     </div>
-  );  
+  );
 };
 
 export default Orders;
