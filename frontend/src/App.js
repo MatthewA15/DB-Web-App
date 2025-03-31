@@ -6,6 +6,7 @@ import Orders from './components/Orders';
 import Navbar from './components/Navbar';
 import Menu from './components./Menu';
 import StaffOrders from './components/StaffOrders';
+import Feedback from './components/Feedback';
 function App() {
   return (
     <Router>
@@ -17,6 +18,7 @@ function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/staff-orders" element={<StaffOrders />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Routes>
       </div>
     </Router>

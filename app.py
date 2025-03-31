@@ -283,6 +283,25 @@ def staff_login():
     )
     return jsonify({"token": token}), 200
 
+#feedback route
+@app.route("/api/feedback", methods=["POST"])
+@token_required
+def submit_feedback():
+    data = request.json
+    order_id = data.get("order_id")
+    rating = data.get("rating")
+    comments = data.get("comments")
+
+    if not order_id or not rating or not comments:
+        return jsonify({"error": "Order ID, rating, and comments are required"}), 400
+
+    cursor.execute(
+        "INSERT INTO feedback (CustomerID, OrderID, Rating, Comments) VALUES (%s, %s, %s, %s)",
+        (request.user_id, order_id, rating, comments)
+    )
+    db.commit()
+
+    return jsonify({"message": "Feedback submitted successfully!"}), 201
 
 if __name__ == "__main__":
     app.run(debug=True)
