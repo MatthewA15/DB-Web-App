@@ -4,7 +4,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Orders from './components/Orders';
 import Navbar from './components/Navbar';
-import Menu from './components./Menu';
+import Menu from './components/Menu';
 import StaffOrders from './components/StaffOrders';
 import Feedback from './components/Feedback';
 import Payment from './components/Payment';
