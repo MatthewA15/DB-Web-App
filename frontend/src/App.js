@@ -1,12 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './Navbar';
-import About from './About';    
-import Menu from './Menu';      
-import Orders from './Orders';
-import Feedback from './Feedback';
-import Login from './Login';
-import Signup from './Signup';
+import Navbar from './components/Navbar';
+import About from './components/About';
+import Menu from './components/Menu';
+import Orders from './components/Orders';
+import Feedback from './components/Feedback';
+import Login from './components/Login';
+import Signup from './components/Signup';
+
 
 const App = () => {
   return (
