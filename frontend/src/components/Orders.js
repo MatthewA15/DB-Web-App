@@ -16,9 +16,7 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const res = await axios.get('https://abhinavsiva.pythonanywhere.com/api/orders', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         setOrders(res.data);
       } catch (err) {

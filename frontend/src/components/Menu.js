@@ -15,9 +15,7 @@ const Menu = () => {
 
       try {
         const res = await axios.get("https://abhinavsiva.pythonanywhere.com/api/menu", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: {Authorization: `Bearer ${token}`},
         });
         setMenu(res.data);
       } catch (err) {
