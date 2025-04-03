@@ -3,7 +3,7 @@ import bcrypt
 import jwt
 import datetime
 import secrets
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import mysql.connector
 from functools import wraps
 from dotenv import load_dotenv
