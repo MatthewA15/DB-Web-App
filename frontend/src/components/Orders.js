@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [selectedItemId, setSelectedItemId] = useState('');
+  const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -13,76 +16,76 @@ const Orders = () => {
       return;
     }
 
-    const fetchOrders = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get('https://abhinavsiva.pythonanywhere.com/api/orders', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setOrders(res.data);
+        const [ordersRes, menuRes] = await Promise.all([
+          axios.get('/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('/api/menu', { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        setOrders(ordersRes.data);
+        setMenuItems(menuRes.data);
       } catch (err) {
-        console.error('Error fetching orders:', err);
-        setError('Failed to fetch orders. Please log in again.');
-        localStorage.removeItem('token');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        console.error(err);
+        setError('Failed to fetch data.');
       }
     };
 
-    fetchOrders();
+    fetchData();
   }, []);
 
   const handleAddOrder = async (e) => {
-    e?.preventDefault(); // ✅ This stops the page navigation
-    const total = prompt("Enter total amount:");
-    if (!total) return;
+    e.preventDefault();
 
-    const itemName = prompt("Enter item name:");
-    const quantity = prompt("Enter quantity:");
-    const price = prompt("Enter item price:");
-
-    if (!itemName || !quantity || !price) {
-      alert("Missing item details.");
+    if (!selectedItemId) {
+      alert("Please select an item.");
       return;
     }
 
-    const items = [
-      {
-        ItemName: itemName,
-        Quantity: parseInt(quantity),
-        Price: parseFloat(price)
-      }
-    ];
+    const item = menuItems.find(item => item.ItemID.toString() === selectedItemId);
+    const totalAmount = item.Price * quantity;
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post("https://abhinavsiva.pythonanywhere.com/api/orders", {
-        total,
+      await axios.post("/api/orders", {
+        total: totalAmount,
         status: "Pending",
-        items
+        items: [{ MenuItemID: item.ItemID, Quantity: quantity }]
       }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Order added!");
+      alert("Order placed successfully!");
       window.location.reload();
     } catch (err) {
-      alert("Failed to add order.");
       console.error(err);
+      alert("Failed to place order.");
     }
   };
-
 
   return (
     <div className="container">
       <h2 className="mb-4">Order Management</h2>
 
-      <button type="button" className="btn btn-success mb-3" onClick={handleAddOrder}>
-  	➕ Add Order with Item
-      </button>
+      <form onSubmit={handleAddOrder} className="mb-3">
+        <select className="form-select mb-2" value={selectedItemId} onChange={e => setSelectedItemId(e.target.value)}>
+          <option value="">Select item</option>
+          {menuItems.map(item => (
+            <option key={item.ItemID} value={item.ItemID}>
+              {item.Name} - ${item.Price.toFixed(2)}
+            </option>
+          ))}
+        </select>
 
+        <input
+          type="number"
+          className="form-control mb-2"
+          placeholder="Quantity"
+          value={quantity}
+          min="1"
+          onChange={e => setQuantity(parseInt(e.target.value))}
+        />
 
+        <button type="submit" className="btn btn-success">➕ Add Order</button>
+      </form>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -94,58 +97,10 @@ const Orders = () => {
         {orders.map((order) => (
           <li className="list-group-item" key={order.OrderID}>
             <p><strong>Order ID:</strong> {order.OrderID}</p>
-            <p><strong>Customer ID:</strong> {order.CustomerID || 'N/A'}</p>
             <p><strong>Customer Name:</strong> {order.CustomerName || 'N/A'}</p>
-            <p><strong>Status:</strong> {order.Status || 'N/A'}</p>
-            <p><strong>Total Amount:</strong> ${order.TotalAmount ? order.TotalAmount.toFixed(2) : '0.00'}</p>
-            <p><strong>Order Date:</strong> {order.OrderDate || 'N/A'}</p>
-
-            <button
-              className="btn btn-warning btn-sm me-2"
-              onClick={async () => {
-                const newStatus = prompt("Enter new status:");
-                if (!newStatus) return;
-                try {
-                  const token = localStorage.getItem("token");
-                  await axios.put(`https://abhinavsiva.pythonanywhere.com/api/orders/${order.OrderID}`, {
-                    status: newStatus
-                  }, {
-                    headers: {
-                      Authorization: `Bearer ${token}`
-                    }
-                  });
-                  alert("Status updated!");
-                  window.location.reload();
-                } catch (err) {
-                  alert("Failed to update status.");
-                  console.error(err);
-                }
-              }}
-            >
-              ✏️ Update Status
-            </button>
-
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={async () => {
-                if (!window.confirm("Are you sure you want to delete this order?")) return;
-                try {
-                  const token = localStorage.getItem("token");
-                  await axios.delete(`https://abhinavsiva.pythonanywhere.com/api/orders/${order.OrderID}`, {
-                    headers: {
-                      Authorization: `Bearer ${token}`
-                    }
-                  });
-                  alert("Order deleted!");
-                  window.location.reload();
-                } catch (err) {
-                  alert("Failed to delete order.");
-                  console.error(err);
-                }
-              }}
-            >
-              🗑️ Delete
-            </button>
+            <p><strong>Status:</strong> {order.Status}</p>
+            <p><strong>Total Amount:</strong> ${order.TotalAmount.toFixed(2)}</p>
+            <p><strong>Order Date:</strong> {order.OrderDate}</p>
           </li>
         ))}
       </ul>
