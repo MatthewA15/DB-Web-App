@@ -9,13 +9,12 @@ from functools import wraps
 from dotenv import load_dotenv
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
-
 # Load environment variables from .env
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="frontend/build", static_url_path="")
+CORS(app)
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "a3f2b4c59d6e82d34f1b8a7e60f8a2c1e9d4c7f5a3b2c6d8e0f1a4b9c3e7d6f5")
 
 # Optionally set SECRET_KEY variable from config
@@ -64,6 +63,14 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
+@app.route("/")
+def serve_react():
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory(app.static_folder, path)
+
 # Create new customer (sign-up)
 @app.route("/api/customers", methods=["POST"])
 def add_customer():
@@ -87,25 +94,36 @@ def login():
     email = data["email"]
     password = data["password"]
 
+    # First try finding in customers table
     cursor.execute("SELECT CustomerID, Password FROM customers WHERE Email = %s", (email,))
     user = cursor.fetchone()
 
-    if not user:
-        print("Login failed: Email not found")
-        return jsonify({"error": "Invalid email or password"}), 401
+    if user:
+        user_id, hashed_password = user
+        user_type = "customer"
+    else:
+        # Try finding in staff table
+        cursor.execute("SELECT StaffID, Password FROM staff WHERE Email = %s", (email,))
+        user = cursor.fetchone()
+        if user:
+            user_id, hashed_password = user
+            user_type = "staff"
+        else:
+            print("Login failed: Email not found in both tables")
+            return jsonify({"error": "Invalid email or password"}), 401
 
-    user_id, hashed_password = user
-    print(f"Stored Hash: {hashed_password}")
-
+    print(f"Stored Hash for {user_type}: {hashed_password}")
     if not bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
         print("Login failed: Password mismatch")
         return jsonify({"error": "Invalid email or password"}), 401
 
+    # If password check passed
     token = jwt.encode(
-        {"user_id": user_id, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
+        {"user_id": user_id, "user_type": user_type, "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)},
         app.config["SECRET_KEY"],
         algorithm="HS256"
     )
+
     return jsonify({"token": token}), 200
 
 # Get all customers (protected)
@@ -158,7 +176,7 @@ def get_orders():
 @token_required
 def create_order():
     data = request.json
-    items = data.get("items", [])  # Expecting a list of items
+    items = data.get("items", [])
 
     # Insert order
     query = """
@@ -174,46 +192,44 @@ def create_order():
     cursor.execute(query, values)
     db.commit()
 
-    order_id = cursor.lastrowid  # Get the newly created order ID
+    order_id = cursor.lastrowid
 
-    # Insert each order item
+    # Insert order items
     for item in items:
-        item_name = item.get("ItemName")
+        menu_item_id = item.get("MenuItemID")
         quantity = item.get("Quantity")
-        price = item.get("Price")
-
-        if item_name and quantity and price:
+        if menu_item_id and quantity:
             cursor.execute(
                 """
-                INSERT INTO order_items (OrderID, ItemName, Quantity, Price)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO order_items (OrderID, MenuItemID, Quantity)
+                VALUES (%s, %s, %s)
                 """,
-                (order_id, item_name, quantity, price)
+                (order_id, menu_item_id, quantity)
             )
-    db.commit()
 
+    db.commit()
     return jsonify({"message": "Order with items created!"}), 201
+
 
 # Adds item to existing order
 @app.route("/api/orders/<int:order_id>/items", methods=["POST"])
 @token_required
 def add_order_item(order_id):
     data = request.json
-    item_name = data.get("ItemName")
+    menu_item_id = data.get("MenuItemID")
     quantity = data.get("Quantity")
-    price = data.get("Price")
 
-    if not item_name or not quantity or not price:
-        return jsonify({"error": "Missing item name, quantity, or price"}), 400
+    if not menu_item_id or not quantity:
+        return jsonify({"error": "Missing menu item ID or quantity"}), 400
 
-    query = """
-        INSERT INTO order_items (OrderID, ItemName, Quantity, Price)
-        VALUES (%s, %s, %s, %s)
-    """
-    values = (order_id, item_name, quantity, price)
-    cursor.execute(query, values)
+    cursor.execute(
+        """
+        INSERT INTO order_items (OrderID, MenuItemID, Quantity)
+        VALUES (%s, %s, %s)
+        """,
+        (order_id, menu_item_id, quantity)
+    )
     db.commit()
-
     return jsonify({"message": "Order item added!"}), 201
 
 #delete an item from the order
@@ -247,7 +263,7 @@ def delete_order(order_id):
 @app.route("/api/menu", methods=["GET"])
 @token_required
 def get_menu():
-    cursor.execute("SELECT * FROM menu_items")
+    cursor.execute("SELECT * FROM menuitems")
     items = cursor.fetchall()
     menu = []
     for item in items:

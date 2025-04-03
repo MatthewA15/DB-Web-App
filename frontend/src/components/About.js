@@ -1,5 +1,6 @@
 // About.js
 import React from 'react';
+import mapImage from './map.png';
 
 const About = () => {
   return (
@@ -21,15 +22,11 @@ const About = () => {
       <p>Email: contact@deliciouseats.com</p>
 
       <h5>🗺️ Find us on the map:</h5>
-      <iframe
-        title="Google Maps"
-        width="100%"
-        height="300"
-        style={{ border: 0 }}
-        loading="lazy"
-        allowFullScreen
-        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBn6kOZXX-EXAMPLEKEY&zoom=15&q=123+Tasty+Street,Flavor+Town,ON"
-      ></iframe>
+      <img
+  	src={mapImage}
+  	alt="Our location on the map"
+ 	style={{ width: '100%', maxWidth: '600px', borderRadius: '10px', border: '1px solid #ccc' }}
+      />
     </div>
   );
 };

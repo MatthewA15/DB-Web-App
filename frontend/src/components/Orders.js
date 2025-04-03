@@ -32,7 +32,8 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  const handleAddOrder = async () => {
+  const handleAddOrder = async (e) => {
+    e?.preventDefault(); // ✅ This stops the page navigation
     const total = prompt("Enter total amount:");
     if (!total) return;
 
@@ -72,13 +73,16 @@ const Orders = () => {
     }
   };
 
+
   return (
     <div className="container">
       <h2 className="mb-4">Order Management</h2>
 
-      <button className="btn btn-success mb-3" onClick={handleAddOrder}>
-        ➕ Add Order with Item
+      <button type="button" className="btn btn-success mb-3" onClick={handleAddOrder}>
+  	➕ Add Order with Item
       </button>
+
+
 
       {error && <div className="alert alert-danger">{error}</div>}
 
