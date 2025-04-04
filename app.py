@@ -8,6 +8,7 @@ import mysql.connector
 from functools import wraps
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask import send_from_directory, jsonify
 
 # Load environment variables from .env
 load_dotenv()
@@ -342,3 +343,10 @@ def submit_payment():
 if __name__ == "__main__":
     app.run(debug=True)
 
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react_app(path):
+    # If the path is an API route, you might want to return a 404
+    if path.startswith("api"):
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory(app.static_folder, "index.html")
