@@ -19,8 +19,12 @@ const Orders = () => {
     const fetchData = async () => {
       try {
         const [ordersRes, menuRes] = await Promise.all([
-          axios.get('/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/menu', { headers: { Authorization: `Bearer ${token}` } })
+          axios.get('/api/orders', {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get('/api/menu', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
         ]);
         setOrders(ordersRes.data);
         setMenuItems(menuRes.data);
@@ -77,12 +81,35 @@ const Orders = () => {
     }
   };
 
+  const handleUpdateStatus = async (orderId) => {
+    const newStatus = prompt("Enter new status:");
+    if (!newStatus) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`/api/orders/${orderId}`, {
+        status: newStatus
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Status updated!");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update status.");
+    }
+  };
+
   return (
     <div className="container">
       <h2 className="mb-4">Order Management</h2>
 
       <form onSubmit={handleAddOrder} className="mb-3">
-        <select className="form-select mb-2" value={selectedItemId} onChange={e => setSelectedItemId(e.target.value)}>
+        <select
+          className="form-select mb-2"
+          value={selectedItemId}
+          onChange={e => setSelectedItemId(e.target.value)}
+        >
           <option value="">Select item</option>
           {menuItems.map(item => (
             <option key={item.ItemID} value={item.ItemID}>
@@ -117,11 +144,9 @@ const Orders = () => {
             <p><strong>Status:</strong> {order.Status}</p>
 
             {order.Items && order.Items.length > 0 && (
-              <ul>
+              <ul className="mb-2">
                 {order.Items.map((item, idx) => (
-                  <li key={idx}>
-                    {item.Name} × {item.Quantity}
-                  </li>
+                  <li key={idx}>{item.Name} × {item.Quantity}</li>
                 ))}
               </ul>
             )}
@@ -130,7 +155,14 @@ const Orders = () => {
             <p><strong>Order Date:</strong> {order.OrderDate}</p>
 
             <button
-              className="btn btn-danger btn-sm mt-2"
+              className="btn btn-warning btn-sm me-2"
+              onClick={() => handleUpdateStatus(order.OrderID)}
+            >
+              ✏️ Update Status
+            </button>
+
+            <button
+              className="btn btn-danger btn-sm"
               onClick={() => handleDeleteOrder(order.OrderID)}
             >
               🗑️ Delete Order
