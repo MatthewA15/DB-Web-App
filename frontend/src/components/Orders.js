@@ -19,12 +19,8 @@ const Orders = () => {
     const fetchData = async () => {
       try {
         const [ordersRes, menuRes] = await Promise.all([
-          axios.get('/api/orders', {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get('/api/menu', {
-            headers: { Authorization: `Bearer ${token}` }
-          })
+          axios.get('/api/orders', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('/api/menu', { headers: { Authorization: `Bearer ${token}` } })
         ]);
         setOrders(ordersRes.data);
         setMenuItems(menuRes.data);
@@ -105,11 +101,7 @@ const Orders = () => {
       <h2 className="mb-4">Order Management</h2>
 
       <form onSubmit={handleAddOrder} className="mb-3">
-        <select
-          className="form-select mb-2"
-          value={selectedItemId}
-          onChange={e => setSelectedItemId(e.target.value)}
-        >
+        <select className="form-select mb-2" value={selectedItemId} onChange={e => setSelectedItemId(e.target.value)}>
           <option value="">Select item</option>
           {menuItems.map(item => (
             <option key={item.ItemID} value={item.ItemID}>
