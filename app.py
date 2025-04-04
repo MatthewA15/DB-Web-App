@@ -149,9 +149,13 @@ def get_customers():
 @token_required
 def get_orders():
     query = """
-    SELECT o.OrderID, o.CustomerID, c.Name AS CustomerName, o.OrderDate, o.Status, o.TotalAmount
+    SELECT o.OrderID, o.CustomerID, c.Name AS CustomerName, o.OrderDate, o.Status, o.TotalAmount,
+           m.Name AS ItemName, oi.Quantity
     FROM orders o
     JOIN customers c ON o.CustomerID = c.CustomerID
+    LEFT JOIN order_items oi ON o.OrderID = oi.OrderID
+    LEFT JOIN menuitems m ON oi.MenuItemID = m.MenuItemID
+    ORDER BY o.OrderID
     """
     cursor.execute(query)
     rows = cursor.fetchall()
@@ -159,18 +163,27 @@ def get_orders():
     if not rows:
         return jsonify([]), 200
 
-    orders = []
+    orders = {}
     for row in rows:
-        orders.append({
-            "OrderID": row[0],
-            "CustomerID": row[1],
-            "CustomerName": row[2],
-            "OrderDate": row[3].isoformat() if row[3] else None,
-            "Status": row[4],
-            "TotalAmount": float(row[5])
-        })
+        order_id = row[0]
+        if order_id not in orders:
+            orders[order_id] = {
+                "OrderID": order_id,
+                "CustomerID": row[1],
+                "CustomerName": row[2],
+                "OrderDate": row[3].isoformat() if row[3] else None,
+                "Status": row[4],
+                "TotalAmount": float(row[5]),
+                "Items": []
+            }
 
-    return jsonify(orders), 200
+        if row[6]:  # ItemName exists
+            orders[order_id]["Items"].append({
+                "Name": row[6],
+                "Quantity": row[7]
+            })
+
+    return jsonify(list(orders.values())), 200
 
 # Place new order (protected)
 @app.route("/api/orders", methods=["POST"])

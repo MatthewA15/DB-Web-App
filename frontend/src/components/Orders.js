@@ -61,6 +61,22 @@ const Orders = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`/api/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Order deleted!");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete order.");
+    }
+  };
+
   return (
     <div className="container">
       <h2 className="mb-4">Order Management</h2>
@@ -95,12 +111,30 @@ const Orders = () => {
 
       <ul className="list-group">
         {orders.map((order) => (
-          <li className="list-group-item" key={order.OrderID}>
+          <li className="list-group-item mb-3" key={order.OrderID}>
             <p><strong>Order ID:</strong> {order.OrderID}</p>
             <p><strong>Customer Name:</strong> {order.CustomerName || 'N/A'}</p>
             <p><strong>Status:</strong> {order.Status}</p>
+
+            {order.Items && order.Items.length > 0 && (
+              <ul>
+                {order.Items.map((item, idx) => (
+                  <li key={idx}>
+                    {item.Name} × {item.Quantity}
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <p><strong>Total Amount:</strong> ${order.TotalAmount.toFixed(2)}</p>
             <p><strong>Order Date:</strong> {order.OrderDate}</p>
+
+            <button
+              className="btn btn-danger btn-sm mt-2"
+              onClick={() => handleDeleteOrder(order.OrderID)}
+            >
+              🗑️ Delete Order
+            </button>
           </li>
         ))}
       </ul>
